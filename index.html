@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
+<title>Buku Kas — Manajemen Keuangan Pribadi</title>
+<meta name="theme-color" content="#12151A" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Buku Kas" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<div class="app-shell">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="app-header">
+    <div class="app-header-eyebrow">Manajemen Keuangan Pribadi</div>
+    <div class="app-header-row">
+      <h1 class="app-title">Buku Kas</h1>
+      <div class="app-header-actions">
+        <button class="icon-btn" id="btn-theme-toggle" aria-label="Ganti tema" title="Ganti tema">
+          <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== MAIN VIEWS ===================== -->
+  <main class="app-main" id="app-main">
+
+    <!-- ---------- DASHBOARD ---------- -->
+    <section class="view" id="view-dashboard" data-view="dashboard">
+      <div class="balance-card">
+        <div class="balance-card-texture"></div>
+        <div class="balance-label">SALDO SAAT INI</div>
+        <div class="balance-amount" id="dash-balance">Rp0</div>
+        <div class="balance-divider"></div>
+        <div class="balance-mini-grid">
+          <div class="mini-stat mini-stat-in">
+            <span class="mini-stat-label"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg>Pemasukan Bulan Ini</span>
+            <span class="mini-stat-value" id="dash-income">Rp0</span>
+          </div>
+          <div class="mini-stat mini-stat-out">
+            <span class="mini-stat-label"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M17 7L7 17M7 17h9M7 17V8"/></svg>Pengeluaran Bulan Ini</span>
+            <span class="mini-stat-value" id="dash-expense">Rp0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Pengeluaran per Kategori</h2>
+          <span class="card-subtitle" id="dash-chart-month"></span>
+        </div>
+        <div id="dash-chart-wrap" class="chart-wrap">
+          <canvas id="dash-chart" width="220" height="220"></canvas>
+          <div class="chart-legend" id="dash-chart-legend"></div>
+        </div>
+        <div class="empty-state" id="dash-chart-empty">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20V10M18 20V4M6 20v-6"/></svg>
+          </div>
+          <p class="empty-title">Belum ada pengeluaran bulan ini</p>
+          <p class="empty-desc">Catat transaksi pertamamu untuk mulai melihat ringkasan.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Transaksi Terbaru</h2>
+          <button class="link-btn" data-nav="transaksi">Lihat semua</button>
+        </div>
+        <ul class="tx-list" id="dash-recent-list"></ul>
+        <div class="empty-state" id="dash-recent-empty">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h3"/></svg>
+          </div>
+          <p class="empty-title">Belum ada transaksi</p>
+          <p class="empty-desc">Ketuk tombol + untuk mencatat transaksi pertamamu.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- TRANSAKSI ---------- -->
+    <section class="view" id="view-transaksi" data-view="transaksi">
+      <div class="view-header-row">
+        <h2 class="view-title">Transaksi</h2>
+        <div class="chip-filter" id="tx-filter">
+          <button class="chip active" data-filter="all">Semua</button>
+          <button class="chip" data-filter="income">Pemasukan</button>
+          <button class="chip" data-filter="expense">Pengeluaran</button>
+        </div>
+      </div>
+      <div id="tx-groups"></div>
+      <div class="empty-state" id="tx-empty">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h3"/></svg>
+        </div>
+        <p class="empty-title">Belum ada transaksi</p>
+        <p class="empty-desc">Semua transaksi yang kamu catat akan muncul di sini.</p>
+      </div>
+    </section>
+
+    <!-- ---------- DOMPET ---------- -->
+    <section class="view" id="view-dompet" data-view="dompet">
+      <div class="view-header-row">
+        <h2 class="view-title">Dompet</h2>
+        <button class="btn-outline-sm" id="btn-add-wallet">+ Dompet</button>
+      </div>
+      <div class="wallet-grid" id="wallet-list"></div>
+      <div class="empty-state" id="wallet-empty">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20M16 15h2"/></svg>
+        </div>
+        <p class="empty-title">Belum ada dompet</p>
+        <p class="empty-desc">Tambahkan dompet seperti Tunai, Bank, atau E-Wallet.</p>
+      </div>
+    </section>
+
+    <!-- ---------- TARGET ---------- -->
+    <section class="view" id="view-target" data-view="target">
+      <div class="view-header-row">
+        <h2 class="view-title">Target Menabung</h2>
+        <button class="btn-outline-sm" id="btn-add-goal">+ Target</button>
+      </div>
+      <div class="goal-list" id="goal-list"></div>
+      <div class="empty-state" id="goal-empty">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l2.5 6.5L21 9l-5 4.5L17.5 21 12 17l-5.5 4L8 13.5 3 9l6.5-.5z"/></svg>
+        </div>
+        <p class="empty-title">Belum ada target tabungan</p>
+        <p class="empty-desc">Buat target untuk memotivasi kebiasaan menabungmu.</p>
+      </div>
+    </section>
+
+    <!-- ---------- LAINNYA (menu) ---------- -->
+    <section class="view" id="view-lainnya" data-view="lainnya">
+      <h2 class="view-title">Lainnya</h2>
+      <div class="menu-list">
+        <button class="menu-item" data-nav="kategori">
+          <span class="menu-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.59 13.41L11 3.83V3H3v8h.83L13.41 20.6a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83z"/><circle cx="6.5" cy="6.5" r="1"/></svg></span>
+          <span class="menu-item-text">
+            <span class="menu-item-title">Kategori</span>
+            <span class="menu-item-desc">Kelola kategori pemasukan &amp; pengeluaran</span>
+          </span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+        <button class="menu-item" data-nav="analisa">
+          <span class="menu-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18M7 15l4-4 3 3 5-6"/></svg></span>
+          <span class="menu-item-text">
+            <span class="menu-item-title">Analisa</span>
+            <span class="menu-item-desc">Ringkasan &amp; insight keuangan bulan ini</span>
+          </span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+        <button class="menu-item" data-nav="pengaturan">
+          <span class="menu-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+          <span class="menu-item-text">
+            <span class="menu-item-title">Pengaturan</span>
+            <span class="menu-item-desc">Tema, cadangan data, dan reset</span>
+          </span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ---------- KATEGORI ---------- -->
+    <section class="view" id="view-kategori" data-view="kategori">
+      <div class="view-header-row">
+        <button class="back-btn" data-nav="lainnya" aria-label="Kembali">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <h2 class="view-title">Kategori</h2>
+        <button class="btn-outline-sm" id="btn-add-category">+ Kategori</button>
+      </div>
+      <div class="segmented" id="cat-segmented">
+        <button class="segment active" data-cat-type="expense">Pengeluaran</button>
+        <button class="segment" data-cat-type="income">Pemasukan</button>
+      </div>
+      <ul class="cat-list" id="cat-list"></ul>
+    </section>
+
+    <!-- ---------- ANALISA ---------- -->
+    <section class="view" id="view-analisa" data-view="analisa">
+      <div class="view-header-row">
+        <button class="back-btn" data-nav="lainnya" aria-label="Kembali">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <h2 class="view-title">Analisa Sederhana</h2>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-box">
+          <span class="stat-box-label">Pemasukan</span>
+          <span class="stat-box-value income" id="an-income">Rp0</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-box-label">Pengeluaran</span>
+          <span class="stat-box-value expense" id="an-expense">Rp0</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-box-label">Selisih</span>
+          <span class="stat-box-value" id="an-selisih">Rp0</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-box-label">Tabungan dari Pemasukan</span>
+          <span class="stat-box-value" id="an-savings-pct">0%</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2 class="card-title">Kategori Pengeluaran Terbesar</h2></div>
+        <div id="an-top-category" class="top-category"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2 class="card-title">Insight</h2></div>
+        <ul class="insight-list" id="an-insights"></ul>
+      </div>
+    </section>
+
+    <!-- ---------- PENGATURAN ---------- -->
+    <section class="view" id="view-pengaturan" data-view="pengaturan">
+      <div class="view-header-row">
+        <button class="back-btn" data-nav="lainnya" aria-label="Kembali">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <h2 class="view-title">Pengaturan</h2>
+      </div>
+
+      <div class="card">
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-title">Mode Tampilan</div>
+            <div class="settings-row-desc">Beralih antara mode gelap dan terang</div>
+          </div>
+          <button class="switch" id="settings-theme-switch" role="switch" aria-checked="true">
+            <span class="switch-knob"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2 class="card-title">Cadangan Data</h2></div>
+        <div class="settings-actions">
+          <button class="btn-secondary" id="btn-export">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>
+            Export Backup JSON
+          </button>
+          <button class="btn-secondary" id="btn-import">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9M17 14l-5-5-5 5M4 3h16"/></svg>
+            Import Backup JSON
+          </button>
+          <input type="file" id="import-file-input" accept="application/json" hidden />
+        </div>
+      </div>
+
+      <div class="card card-danger">
+        <div class="card-header"><h2 class="card-title">Zona Berbahaya</h2></div>
+        <p class="settings-row-desc">Menghapus seluruh dompet, transaksi, kategori, dan target tabungan secara permanen.</p>
+        <button class="btn-danger" id="btn-reset">Reset Semua Data</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================== BOTTOM NAV ===================== -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-nav="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      <span>Dasbor</span>
+    </button>
+    <button class="nav-item" data-nav="transaksi">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h3"/></svg>
+      <span>Transaksi</span>
+    </button>
+    <button class="nav-fab" id="btn-open-add-tx" aria-label="Tambah transaksi">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+    <button class="nav-item" data-nav="dompet">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20M16 15h2"/></svg>
+      <span>Dompet</span>
+    </button>
+    <button class="nav-item" data-nav="lainnya">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+      <span>Lainnya</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ===================== MODAL: TAMBAH / EDIT TRANSAKSI ===================== -->
+<div class="modal-overlay" id="modal-tx">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 class="modal-title" id="tx-modal-title">Tambah Transaksi</h3>
+      <button class="modal-close" data-close-modal="modal-tx" aria-label="Tutup">&times;</button>
+    </div>
+    <form id="form-tx" class="modal-body">
+      <input type="hidden" id="tx-id" />
+      <div class="segmented" id="tx-type-segmented">
+        <button type="button" class="segment active" data-tx-type="expense">Pengeluaran</button>
+        <button type="button" class="segment" data-tx-type="income">Pemasukan</button>
+      </div>
+
+      <label class="field">
+        <span class="field-label">Nominal</span>
+        <div class="amount-input">
+          <span class="amount-prefix">Rp</span>
+          <input type="text" inputmode="numeric" id="tx-amount" placeholder="0" required />
+        </div>
+      </label>
+
+      <label class="field">
+        <span class="field-label">Kategori</span>
+        <select id="tx-category" required></select>
+      </label>
+
+      <label class="field">
+        <span class="field-label">Dompet</span>
+        <select id="tx-wallet" required></select>
+      </label>
+
+      <label class="field">
+        <span class="field-label">Tanggal</span>
+        <input type="date" id="tx-date" required />
+      </label>
+
+      <label class="field">
+        <span class="field-label">Catatan (opsional)</span>
+        <textarea id="tx-note" rows="2" placeholder="Contoh: Makan siang bersama tim"></textarea>
+      </label>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-danger-ghost" id="tx-delete-btn" hidden>Hapus</button>
+        <button type="submit" class="btn-primary">Simpan Transaksi</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL: TAMBAH / EDIT DOMPET ===================== -->
+<div class="modal-overlay" id="modal-wallet">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 class="modal-title" id="wallet-modal-title">Tambah Dompet</h3>
+      <button class="modal-close" data-close-modal="modal-wallet" aria-label="Tutup">&times;</button>
+    </div>
+    <form id="form-wallet" class="modal-body">
+      <input type="hidden" id="wallet-id" />
+      <label class="field">
+        <span class="field-label">Nama Dompet</span>
+        <input type="text" id="wallet-name" placeholder="Contoh: Tunai, BCA, GoPay" required maxlength="30" />
+      </label>
+      <label class="field">
+        <span class="field-label">Saldo Awal</span>
+        <div class="amount-input">
+          <span class="amount-prefix">Rp</span>
+          <input type="text" inputmode="numeric" id="wallet-initial" placeholder="0" />
+        </div>
+        <span class="field-hint" id="wallet-initial-hint">Saldo awal dicatat sekali saat dompet dibuat.</span>
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="btn-danger-ghost" id="wallet-delete-btn" hidden>Hapus</button>
+        <button type="submit" class="btn-primary">Simpan Dompet</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL: TAMBAH / EDIT KATEGORI ===================== -->
+<div class="modal-overlay" id="modal-category">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 class="modal-title" id="category-modal-title">Tambah Kategori</h3>
+      <button class="modal-close" data-close-modal="modal-category" aria-label="Tutup">&times;</button>
+    </div>
+    <form id="form-category" class="modal-body">
+      <input type="hidden" id="category-id" />
+      <label class="field">
+        <span class="field-label">Nama Kategori</span>
+        <input type="text" id="category-name" placeholder="Contoh: Langganan" required maxlength="24" />
+      </label>
+      <label class="field">
+        <span class="field-label">Tipe</span>
+        <div class="segmented" id="category-type-segmented">
+          <button type="button" class="segment active" data-cat-form-type="expense">Pengeluaran</button>
+          <button type="button" class="segment" data-cat-form-type="income">Pemasukan</button>
+        </div>
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="btn-danger-ghost" id="category-delete-btn" hidden>Hapus</button>
+        <button type="submit" class="btn-primary">Simpan Kategori</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL: TAMBAH / EDIT TARGET ===================== -->
+<div class="modal-overlay" id="modal-goal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 class="modal-title" id="goal-modal-title">Tambah Target</h3>
+      <button class="modal-close" data-close-modal="modal-goal" aria-label="Tutup">&times;</button>
+    </div>
+    <form id="form-goal" class="modal-body">
+      <input type="hidden" id="goal-id" />
+      <label class="field">
+        <span class="field-label">Nama Target</span>
+        <input type="text" id="goal-name" placeholder="Contoh: Dana Darurat" required maxlength="30" />
+      </label>
+      <label class="field">
+        <span class="field-label">Nominal Target</span>
+        <div class="amount-input">
+          <span class="amount-prefix">Rp</span>
+          <input type="text" inputmode="numeric" id="goal-target" placeholder="0" required />
+        </div>
+      </label>
+      <label class="field">
+        <span class="field-label">Nominal Terkumpul</span>
+        <div class="amount-input">
+          <span class="amount-prefix">Rp</span>
+          <input type="text" inputmode="numeric" id="goal-current" placeholder="0" />
+        </div>
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="btn-danger-ghost" id="goal-delete-btn" hidden>Hapus</button>
+        <button type="submit" class="btn-primary">Simpan Target</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== KONFIRMASI GENERIK ===================== -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal-sheet modal-sheet-sm">
+    <div class="modal-handle"></div>
+    <div class="modal-body">
+      <p class="confirm-text" id="confirm-text">Yakin ingin melanjutkan?</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="confirm-cancel">Batal</button>
+        <button type="button" class="btn-danger" id="confirm-ok">Ya, Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="database.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
