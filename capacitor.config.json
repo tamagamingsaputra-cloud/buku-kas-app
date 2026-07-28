@@ -1,5 +1,5 @@
 {
-  "appId": "com.tama.bukukas",
-  "appName": "Buku Kas",
-  "webDir": "."
+  "appId": "com.tamagamingsaputra.bukukas",
+  "appName": "Buku Kas App",
+  "webDir": "www"
 }
