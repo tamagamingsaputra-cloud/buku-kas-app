@@ -23,12 +23,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Add Android platform
+      -       - name: Add Android platform
         run: npx cap add android
+
+      - name: Generate Android icon
+        run: npx @capacitor/assets generate --android
 
       - name: Sync Capacitor
         run: npx cap sync android
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
